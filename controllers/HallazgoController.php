@@ -4,18 +4,21 @@ require_once 'models/HallazgoModel.php';
 require_once 'models/ProcesoModel.php';
 require_once 'models/EstadoModel.php';
 require_once 'models/UsuarioModel.php';
+require_once 'models/PlanAccionModel.php'; // H-6778: Modelo de planes de acción
 
 class HallazgoController {
     private $model;
     private $procesoModel;
     private $estadoModel;
     private $usuarioModel;
+    private $planAccionModel; // H-6778: Modelo de planes de acción
 
     public function __construct($pdo) {
         $this->model = new HallazgoModel($pdo);
         $this->procesoModel = new ProcesoModel($pdo);
         $this->estadoModel = new EstadoModel($pdo);
         $this->usuarioModel = new UsuarioModel($pdo);
+        $this->planAccionModel = new PlanAccionModel($pdo); // H-6778
     }
 
     public function index() {
@@ -71,6 +74,38 @@ class HallazgoController {
     public function delete($id) {
         $this->model->delete($id);
         header('Location: index.php?action=index');
+    }
+
+    // H-6778: Método para mostrar los planes de acción de un hallazgo
+    public function planesAccion($id_hallazgo) {
+        $hallazgo = $this->model->getById($id_hallazgo);
+        $planesAccion = $this->planAccionModel->getByRegistro($id_hallazgo, 'HALLAZGO');
+        $estados = $this->estadoModel->getAll();
+        $usuarios = $this->usuarioModel->getAll();
+        $entity = 'hallazgo'; // Variable para los componentes compartidos
+        require 'views/hallazgo/planes_accion.php';
+    }
+
+    // H-6778: Método para insertar un plan de acción vinculado a un hallazgo
+    public function insertPlanAccion($id_hallazgo, $data) {
+        $id_plan_accion = $this->planAccionModel->insert($data);
+        if ($id_plan_accion) {
+            $this->planAccionModel->linkToRegistro($id_plan_accion, $id_hallazgo, 'HALLAZGO');
+        }
+        header('Location: index.php?entity=hallazgo&action=planes_accion&id=' . $id_hallazgo);
+    }
+
+    // H-6778: Método para actualizar un plan de acción de un hallazgo
+    public function updatePlanAccion($id_hallazgo, $id_plan_accion, $data) {
+        $this->planAccionModel->update($id_plan_accion, $data);
+        header('Location: index.php?entity=hallazgo&action=planes_accion&id=' . $id_hallazgo);
+    }
+
+    // H-6778: Método para eliminar un plan de acción de un hallazgo
+    public function deletePlanAccion($id_hallazgo, $id_plan_accion) {
+        $this->planAccionModel->unlinkFromRegistro($id_plan_accion, $id_hallazgo, 'HALLAZGO');
+        $this->planAccionModel->delete($id_plan_accion);
+        header('Location: index.php?entity=hallazgo&action=planes_accion&id=' . $id_hallazgo);
     }
 
     // H-5995: Endpoint AJAX para actualizar el estado de un hallazgo sin recargar la página
