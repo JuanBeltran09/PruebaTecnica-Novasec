@@ -102,7 +102,10 @@ if ($entity === 'incidente') {
     $controller = new HallazgoController($pdo);
 
     // Acciones existentes para 'hallazgo'
-    if ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    // H-5995: Ruta para actualización asíncrona del estado
+    if ($action === 'update_estado' && $id && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $controller->updateEstadoAjax($id);
+    } elseif ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $controller->insert($_POST);
     } elseif ($action === 'edit' && $id && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $controller->update($id, $_POST);

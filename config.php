@@ -1,9 +1,9 @@
 <?php
 // config.php
-$host = 'db.prueba.com';
+$host = 'localhost';
 $dbname = 'GestionHallazgos';
-$user = 'admin';
-$pass = '0000';
+$user = 'root';
+$pass = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);

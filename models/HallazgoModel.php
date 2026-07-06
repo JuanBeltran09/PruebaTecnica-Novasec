@@ -64,6 +64,12 @@ class HallazgoModel {
         return false;
     }
 
+    // H-5995: Método específico para actualizar únicamente el estado de un hallazgo
+    public function updateEstado($id, $id_estado) {
+        $stmt = $this->pdo->prepare("UPDATE Hallazgo SET id_estado = ? WHERE id = ?");
+        return $stmt->execute([$id_estado, $id]);
+    }
+
     public function delete($id) {
         $stmt = $this->pdo->prepare("DELETE FROM Hallazgo WHERE id = ?");
         return $stmt->execute([$id]);

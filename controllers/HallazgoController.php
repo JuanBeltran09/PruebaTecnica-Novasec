@@ -20,6 +20,7 @@ class HallazgoController {
 
     public function index() {
         $hallazgos = $this->model->getAll();
+        $estados = $this->estadoModel->getAll(); // H-5995: Se pasan los estados a la vista para los selectores
         require 'views/hallazgo/list.php';
     }
 
@@ -70,6 +71,34 @@ class HallazgoController {
     public function delete($id) {
         $this->model->delete($id);
         header('Location: index.php?action=index');
+    }
+
+    // H-5995: Endpoint AJAX para actualizar el estado de un hallazgo sin recargar la página
+    public function updateEstadoAjax($id) {
+        header('Content-Type: application/json');
+
+        // Leer el cuerpo de la petición JSON
+        $input = json_decode(file_get_contents('php://input'), true);
+        $id_estado = $input['id_estado'] ?? null;
+
+        if (!$id_estado) {
+            echo json_encode(['success' => false, 'message' => 'El id_estado es requerido.']);
+            return;
+        }
+
+        $result = $this->model->updateEstado($id, $id_estado);
+
+        if ($result) {
+            // Obtener el nombre del nuevo estado para mostrarlo en la alerta
+            $estado = $this->estadoModel->getById($id_estado);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Estado actualizado correctamente.',
+                'estado_nombre' => $estado['nombre']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Error al actualizar el estado.']);
+        }
     }
 }
 ?>
