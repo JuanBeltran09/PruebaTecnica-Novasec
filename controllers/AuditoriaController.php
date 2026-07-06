@@ -6,6 +6,7 @@ require_once 'models/PruebaTareaModel.php';
 require_once 'models/ResultadoPruebaModel.php';
 require_once 'models/EstadoModel.php';
 require_once 'models/UsuarioModel.php';
+require_once 'models/HallazgoModel.php'; // Agregado para escalamiento
 
 class AuditoriaController {
     private $model;
@@ -14,6 +15,7 @@ class AuditoriaController {
     private $resultadoModel;
     private $estadoModel;
     private $usuarioModel;
+    private $hallazgoModel; // Modelo para escalamiento
 
     public function __construct($pdo) {
         $this->model = new PlanAuditoriaModel($pdo);
@@ -22,6 +24,7 @@ class AuditoriaController {
         $this->resultadoModel = new ResultadoPruebaModel($pdo);
         $this->estadoModel = new EstadoModel($pdo);
         $this->usuarioModel = new UsuarioModel($pdo);
+        $this->hallazgoModel = new HallazgoModel($pdo);
     }
 
     // ===================== PLANES =====================
@@ -160,6 +163,30 @@ class AuditoriaController {
     public function deleteResultado($id_plan, $id_resultado) {
         $this->resultadoModel->delete($id_resultado);
         header('Location: index.php?entity=auditoria&action=tareas&id=' . $id_plan);
+    }
+
+    // Escalamiento Automatizado de Hallazgos
+    public function escalarAHallazgo($id_plan, $id_resultado) {
+        $resultado = $this->resultadoModel->getById($id_resultado);
+        
+        if ($resultado && $resultado['tipo'] === 'Hallazgo') {
+            // Se usa el título de la prueba y la descripción del resultado
+            $titulo = "Escalado desde Auditoría: Resultado " . $resultado['id'];
+            $descripcion = $resultado['descripcion'] . "\n\nObservaciones: " . $resultado['observaciones'];
+            $id_estado = 1; // Por defecto estado inicial (ej. 'Abierto' o el que corresponda al ID 1)
+            $id_usuario = $resultado['id_usuario']; // Mismo usuario que reportó el hallazgo
+
+            $nuevo_hallazgo_id = $this->hallazgoModel->insertFromAuditoria($titulo, $descripcion, $id_estado, $id_usuario);
+
+            if ($nuevo_hallazgo_id) {
+                // Redirigir al nuevo hallazgo creado para que puedan verlo y completarlo
+                header('Location: index.php?entity=hallazgo&action=show&id=' . $nuevo_hallazgo_id);
+                exit;
+            }
+        }
+        // Si falla o no es hallazgo, vuelve a la tarea
+        header('Location: index.php?entity=auditoria&action=tareas&id=' . $id_plan);
+        exit;
     }
 }
 ?>

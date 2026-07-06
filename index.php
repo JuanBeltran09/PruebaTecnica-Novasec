@@ -69,6 +69,8 @@ if ($entity === 'incidente') {
             $controller->deletePrueba($id, $_GET['delete_prueba']);
         } elseif (isset($_GET['delete_resultado']) && $_GET['delete_resultado']) {
             $controller->deleteResultado($id, $_GET['delete_resultado']);
+        } elseif (isset($_GET['escalar_hallazgo']) && $_GET['escalar_hallazgo']) {
+            $controller->escalarAHallazgo($id, $_GET['escalar_hallazgo']);
         } elseif (isset($_GET['indentar']) && $_GET['indentar']) {
             $controller->indentarTarea($id, $_GET['indentar']);
         } elseif (isset($_GET['desindentar']) && $_GET['desindentar']) {

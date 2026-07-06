@@ -70,6 +70,16 @@ class HallazgoModel {
         return $stmt->execute([$id_estado, $id]);
     }
 
+    // Escalamiento desde Auditoría: Inserta un hallazgo y retorna su ID
+    public function insertFromAuditoria($titulo, $descripcion, $id_estado, $id_usuario) {
+        $stmt = $this->pdo->prepare("INSERT INTO Hallazgo (titulo, descripcion, id_estado, id_usuario) VALUES (?, ?, ?, ?)");
+        $result = $stmt->execute([$titulo, $descripcion, $id_estado, $id_usuario]);
+        if ($result) {
+            return $this->pdo->lastInsertId();
+        }
+        return false;
+    }
+
     public function delete($id) {
         $stmt = $this->pdo->prepare("DELETE FROM Hallazgo WHERE id = ?");
         return $stmt->execute([$id]);

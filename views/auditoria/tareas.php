@@ -253,7 +253,13 @@ $totalDias = ($min !== null && $max !== null) ? max(1, round(($max - $min) / 864
                             <td><?= $res['observaciones'] ?></td>
                             <td><?= $res['fecha_observacion'] ?></td>
                             <td><?= $res['usuario_nombre'] ?></td>
-                            <td><a href="index.php?entity=auditoria&action=tareas&id=<?= $plan['id'] ?>&delete_resultado=<?= $res['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este resultado?')">Eliminar</a></td>
+                            <td>
+                                <!-- Botón de Escalar a Gestión de Hallazgos si aplica -->
+                                <?php if ($res['tipo'] === 'Hallazgo'): ?>
+                                    <a href="index.php?entity=auditoria&action=tareas&id=<?= $plan['id'] ?>&escalar_hallazgo=<?= $res['id'] ?>" class="btn btn-primary btn-sm" onclick="return confirm('¿Escalar este resultado como un nuevo Hallazgo en el sistema general?')">Escalar a Hallazgo</a>
+                                <?php endif; ?>
+                                <a href="index.php?entity=auditoria&action=tareas&id=<?= $plan['id'] ?>&delete_resultado=<?= $res['id'] ?>" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este resultado?')">Eliminar</a>
+                            </td>
                           </tr>
                           <?php endforeach; ?>
                         </tbody>
